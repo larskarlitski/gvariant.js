@@ -1,0 +1,24 @@
+{
+    "name": "gvariant",
+    "version": "0.1.0",
+    "license": "BSD-3-Clause",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/larsu/gvariant.js"
+    },
+    "main": "gvariant.js",
+    "files": [ "gvariant.js" ],
+    "dependencies": {
+        "bindings": ">= 1.2.x"
+    },
+    "devDependencies": {
+        "jshint": "*"
+    },
+    "scripts": {
+        "preinstall": "true",
+        "test": "jshint **.js",
+
+        "pretest:glib": "node-gyp rebuild",
+        "test:glib": "node test.js"
+    }
+}
