@@ -5,8 +5,17 @@ GVariant.js
 A JavaScript implementation of the GVariant serialization specification. It
 maps serialized GVariants to native JavaScript values.
 
-Only a reader is implemented at the moment. It can only handle normal form.
+Only a reader is implemented at the moment. It can only handle little-endian
+data in normal form.
 
+```javascript
+var gvariant = require('gvariant');
+
+var data = new Buffer([0x2a, 0x0, 0x0, 0x0]);
+var value = gvariant.parse('u', data);
+
+console.log(value);
+```
 
 Type Mapping
 ------------
@@ -26,6 +35,17 @@ entry (`{}`), in which case they map to `Object`. Tuples (`()`) also map to
 `Array`.
 
 
-Variants (`v`) map to the JavaScript representation of their content.  So do
+Variants (`v`) map to the JavaScript representation of their content. So do
 maybe types (`m<type>`) in the `Just` case. In the `Nothing` case, maybes map
 to `null`.
+
+
+Testing
+-------
+
+The reader is tested with a node module that uses glib's GVariant
+implementation to generate seralized variants. This test is not run by default,
+so that people using gvariant.js don't have to have glib installed. Run them
+with
+
+    npm run test:glib
