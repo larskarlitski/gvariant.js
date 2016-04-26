@@ -7,7 +7,12 @@
         "url": "https://github.com/larsu/gvariant.js"
     },
     "main": "gvariant.js",
-    "files": [ "gvariant.js" ],
+    "files": [
+        "gvariant.js",
+        "binding.gyp",
+        "glib-gvariant.cc",
+        "test.js"
+    ],
     "dependencies": {
         "bindings": ">= 1.2.x"
     },
