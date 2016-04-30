@@ -29,8 +29,9 @@ static void parse(const v8::FunctionCallbackInfo<v8::Value> &args) {
         GError *error = NULL;
         GVariant *v = g_variant_parse(G_VARIANT_TYPE(*type), *text, NULL, NULL, &error);
         if (v == NULL) {
-                isolate->ThrowException(v8::Exception::TypeError(
-                        v8::String::NewFromUtf8(isolate, error->message)));
+                char *msg = g_strconcat("Unable to parse GVariant text: ", error->message, NULL);
+                isolate->ThrowException(v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, msg)));
+                g_free(msg);
                 g_error_free(error);
                 return;
         }
