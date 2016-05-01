@@ -176,6 +176,8 @@ function nextType(signature, index) {
                 alignment = Math.max(alignment, el.alignment);
                 end += el.id.length;
             }
+            if (size === 0)
+                size = 1;
             return {
                 id: signature.slice(index, end + 1),
                 elements: elements,
@@ -203,8 +205,6 @@ function nextType(signature, index) {
                     return values;
                 }
             };
-
-
 
         case '{':
             var key = nextType(signature, index + 1);

@@ -46,6 +46,8 @@ var ok = true;
 
     [ 'amu', '[nothing, 1, nothing, 2, nothing]', [null, 1, null, 2, null] ],
 
+    [ '(()b)', '((), true)', [[], true] ],
+
 ].forEach(function (args, index) {
     var type = args[0];
     var text = args[1];
