@@ -22,6 +22,7 @@ function nextType(signature, index) {
                 id: 'y',
                 size: 1,
                 alignment: 1,
+                defaultValue: 0,
                 read: function (buf, start) {
                     return buf.readUInt8(start);
                 }
@@ -32,6 +33,7 @@ function nextType(signature, index) {
                 id: 'n',
                 size: 2,
                 alignment: 2,
+                defaultValue: 0,
                 read: function (buf, start) {
                     return buf.readInt16LE(start);
                 }
@@ -42,6 +44,7 @@ function nextType(signature, index) {
                 id: 'q',
                 size: 2,
                 alignment: 2,
+                defaultValue: 0,
                 read: function (buf, start) {
                     return buf.readUInt16LE(start);
                 }
@@ -52,6 +55,7 @@ function nextType(signature, index) {
                 id: 'i',
                 size: 4,
                 alignment: 4,
+                defaultValue: 0,
                 read: function (buf, start) {
                     return buf.readInt32LE(start);
                 }
@@ -62,6 +66,7 @@ function nextType(signature, index) {
                 id: 'u',
                 size: 4,
                 alignment: 4,
+                defaultValue: 0,
                 read: function (buf, start) {
                     return buf.readUInt32LE(start);
                 }
@@ -72,6 +77,7 @@ function nextType(signature, index) {
                 id: 'x',
                 size: 8,
                 alignment: 8,
+                defaultValue: 0,
                 read: function (buf, start) {
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
@@ -86,6 +92,7 @@ function nextType(signature, index) {
                 id: 't',
                 size: 8,
                 alignment: 8,
+                defaultValue: 0,
                 read: function (buf, start) {
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
@@ -98,6 +105,7 @@ function nextType(signature, index) {
                 id: 'd',
                 size: 8,
                 alignment: 8,
+                defaultValue: 0.0,
                 read: function (buf, start) {
                     return buf.readDoubleLE(start);
                 }
@@ -108,6 +116,7 @@ function nextType(signature, index) {
                 id: 'b',
                 size: 1,
                 alignment: 1,
+                defaultValue: false,
                 read: function (buf, start) {
                     return !!buf.readUInt8(start);
                 }
@@ -119,6 +128,7 @@ function nextType(signature, index) {
             return {
                 id: signature[index],
                 alignment: 1,
+                defaultValue: '',
                 read: function (buf, start, end) {
                     return buf.toString('utf-8', start, end - 1); // skip \0
                 }
@@ -128,6 +138,7 @@ function nextType(signature, index) {
             return {
                 id: 'v',
                 alignment: 8,
+                defaultValue: [],
 
                 read: function (buf, start, end) {
                     var sep = end - 1;
@@ -149,6 +160,7 @@ function nextType(signature, index) {
                 id: signature.substr(index, maybeElement.id.length + 1),
                 alignment: maybeElement.alignment,
                 element: maybeElement,
+                defaultValue: null,
 
                 read: function (buf, start, end) {
 
@@ -183,6 +195,7 @@ function nextType(signature, index) {
                 elements: elements,
                 size: size,
                 alignment: alignment,
+                defaultValue: elements.map(function (el) { return el.defaultValue; }),
 
                 read: function (buf, start, end) {
                     var offsets = offsetInfo(buf, start, end);
@@ -216,6 +229,7 @@ function nextType(signature, index) {
                 value: value,
                 size: align(key.size, value.alignment) + value.size,
                 alignment: Math.max(key.alignment, value.alignment),
+                defaultValue: [ key.defaultValue, value.defaultValue ],
 
                 read: function (buf, start, end) {
                     var offsets = offsetInfo(buf, start, end);
@@ -243,6 +257,7 @@ function nextType(signature, index) {
                 id: signature.substr(index, element.id.length + 1),
                 alignment: element.alignment,
                 element: element,
+                defaultValue: [],
 
                 read: function (buf, start, end) {
                     if (start == end)
