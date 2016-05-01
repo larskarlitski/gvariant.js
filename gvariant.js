@@ -23,7 +23,9 @@ function nextType(signature, index) {
                 size: 1,
                 alignment: 1,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 1)
+                        return this.defaultValue;
                     return buf.readUInt8(start);
                 }
             };
@@ -34,7 +36,9 @@ function nextType(signature, index) {
                 size: 2,
                 alignment: 2,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 2)
+                        return this.defaultValue;
                     return buf.readInt16LE(start);
                 }
             };
@@ -45,7 +49,9 @@ function nextType(signature, index) {
                 size: 2,
                 alignment: 2,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 2)
+                        return this.defaultValue;
                     return buf.readUInt16LE(start);
                 }
             };
@@ -56,7 +62,9 @@ function nextType(signature, index) {
                 size: 4,
                 alignment: 4,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 4)
+                        return this.defaultValue;
                     return buf.readInt32LE(start);
                 }
             };
@@ -67,7 +75,9 @@ function nextType(signature, index) {
                 size: 4,
                 alignment: 4,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 4)
+                        return this.defaultValue;
                     return buf.readUInt32LE(start);
                 }
             };
@@ -78,7 +88,9 @@ function nextType(signature, index) {
                 size: 8,
                 alignment: 8,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 8)
+                        return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
                     if (hi > 0x7fffffff)
@@ -93,7 +105,9 @@ function nextType(signature, index) {
                 size: 8,
                 alignment: 8,
                 defaultValue: 0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 8)
+                        return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
                     return (hi * 0x100000000) + lo;
@@ -106,7 +120,9 @@ function nextType(signature, index) {
                 size: 8,
                 alignment: 8,
                 defaultValue: 0.0,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 8)
+                        return this.defaultValue;
                     return buf.readDoubleLE(start);
                 }
             };
@@ -117,7 +133,9 @@ function nextType(signature, index) {
                 size: 1,
                 alignment: 1,
                 defaultValue: false,
-                read: function (buf, start) {
+                read: function (buf, start, end) {
+                    if (end - start !== 1)
+                        return this.defaultValue;
                     return !!buf.readUInt8(start);
                 }
             };
@@ -198,6 +216,9 @@ function nextType(signature, index) {
                 defaultValue: elements.map(function (el) { return el.defaultValue; }),
 
                 read: function (buf, start, end) {
+                    if (this.size && end - start !== this.size)
+                        return this.defaultValue;
+
                     var offsets = offsetInfo(buf, start, end);
                     var values = [];
                     var cur = start;
@@ -232,6 +253,9 @@ function nextType(signature, index) {
                 defaultValue: [ key.defaultValue, value.defaultValue ],
 
                 read: function (buf, start, end) {
+                    if (this.size && end - start !== this.size)
+                        return this.defaultValue;
+
                     var offsets = offsetInfo(buf, start, end);
                     var keyEnd, valueEnd;
 
