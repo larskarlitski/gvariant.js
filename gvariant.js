@@ -148,6 +148,8 @@ function nextType(signature, index) {
                 alignment: 1,
                 defaultValue: '',
                 read: function (buf, start, end) {
+                    if (start === end || buf.readUInt8(end - 1) !== 0)
+                        return this.defaultValue;
                     return buf.toString('utf-8', start, end - 1); // skip \0
                 }
             };
