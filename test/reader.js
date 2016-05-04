@@ -79,4 +79,35 @@ describe('gvariant.parse()', function () {
                                                          0x2b, 0x0, 0x0, 0x0,
                                                          0x0, 0x69, 0x4, 0xf, 0x1f ]), { abc: 42, def: 43 });
     });
+
+    describe('should handle non-normal serialized data:', function () {
+
+        it('wrong size for fixed size value', function () {
+            assert.strictEqual(gvariant.parse('b', [ 0x1, 0x1, 0x1 ]), false);
+            assert.strictEqual(gvariant.parse('y', []), 0);
+            assert.strictEqual(gvariant.parse('u', [ 0x0, 0x1 ]), 0);
+            assert.strictEqual(gvariant.parse('x', [ 0x0, 0x1, 0x2, 0x3 ]), 0);
+        });
+
+        it('boolean out of range', function () {
+            assert.strictEqual(gvariant.parse('b', [ 0x2a ]), true);
+        });
+
+        it('possibly unterminated string', function () {
+            assert.strictEqual(gvariant.parse('s', [ 0x61 ]), '');
+        });
+
+        it('string with embedded nul', function () {
+            assert.strictEqual(gvariant.parse('s', [ 0x61, 0x0, 0x61, 0x0  ]), 'a');
+        });
+
+        it('wrong size for fixed size maybe', function () {
+            assert.strictEqual(gvariant.parse('my', [ ]), null);
+            assert.strictEqual(gvariant.parse('mu', [ 0x1, 0x2, 0x3, 0x4, 0x5]), null);
+        });
+
+        it('wrong size for fixed width array', function () {
+            assert.deepStrictEqual(gvariant.parse('aq', [ 0x1 ]), []);
+        });
+    });
 });
