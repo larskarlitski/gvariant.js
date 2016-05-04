@@ -328,6 +328,9 @@ function nextType(signature, index) {
 }
 
 function parse(typestr, data) {
+    if (Array.isArray(data))
+        data = new Buffer(data);
+
     var type = nextType(typestr, 0);
     return type.read(data, 0, data.length);
 }
