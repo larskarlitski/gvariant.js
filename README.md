@@ -38,14 +38,3 @@ entry (`{}`), in which case they map to `Object`. Tuples (`()`) also map to
 Variants (`v`) map to the JavaScript representation of their content. So do
 maybe types (`m<type>`) in the `Just` case. In the `Nothing` case, maybes map
 to `null`.
-
-
-Testing
--------
-
-The reader is tested with a node module that uses glib's GVariant
-implementation to generate seralized variants. This test is not run by default,
-so that people using gvariant.js don't have to have glib installed. Run them
-with
-
-    npm run test:glib
