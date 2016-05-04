@@ -195,10 +195,15 @@ function nextType(signature, index) {
                         return null;
 
                     // Just
-                    if (this.element.size)
+                    if (this.element.size) {
+                        if (end - start !== this.element.size)
+                            return null;
+
                         return this.element.read(buf, start, end);
-                    else
+                    }
+                    else {
                         return this.element.read(buf, start, end - 1);
+                    }
                 }
             };
 
@@ -300,6 +305,9 @@ function nextType(signature, index) {
                     var i, n, cur, offsets;
 
                     if (this.element.size) {
+                        if (size % this.element.size !== 0)
+                            return [];
+
                         n = size / this.element.size;
                         cur = start;
                         for (i = 0; i < n; i++) {
