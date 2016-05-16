@@ -4,6 +4,13 @@ var assert = require('assert');
 
 describe('gvariant.parse()', function () {
 
+    it('should throw an error when passed invalid type strings', function () {
+        assert.throws(function () { gvariant.parse('bb'); }, TypeError);
+        assert.throws(function () { gvariant.parse(''); }, TypeError);
+        assert.throws(function () { gvariant.parse('ä'); }, TypeError);
+        assert.throws(function () { gvariant.parse('(a'); }, TypeError);
+    });
+
     it('should map gvariant booleans to javascript booleans', function () {
         assert.strictEqual(gvariant.parse('b', [ 0x0 ]), false);
         assert.strictEqual(gvariant.parse('b', [ 0x1 ]), true);

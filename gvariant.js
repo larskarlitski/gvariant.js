@@ -340,6 +340,9 @@ function parse(typestr, data) {
         data = new Buffer(data);
 
     var type = nextType(typestr, 0);
+    if (!type || type.id.length !== typestr.length)
+        throw new TypeError('invalid type string: ' + typestr);
+
     return type.read(data, 0, data.length);
 }
 
