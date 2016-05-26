@@ -34,7 +34,8 @@ Arrays (`a<type>`) map to the `Array` type, unless `<type>` is a dictionary
 entry (`{}`), in which case they map to `Object`. Tuples (`()`) also map to
 `Array`.
 
+Variants (`v`) map to an object with `type` set to the variant's type string
+and `value` to the JavaScript representation of its value.
 
-Variants (`v`) map to the JavaScript representation of their content. So do
-maybe types (`m<type>`) in the `Just` case. In the `Nothing` case, maybes map
-to `null`.
+Maybes (`m<type>`) map to the JavaScript representation of their content in the
+`Just` case and to to `null` in the `Nothing` case.

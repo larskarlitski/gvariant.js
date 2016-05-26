@@ -45,8 +45,9 @@ describe('gvariant.parse()', function () {
         assert.strictEqual(gvariant.parse('s', [ 0x61, 0x62, 0x63, 0x0 ]), 'abc');
     });
 
-    it('should map variants to their contents', function () {
-        assert.strictEqual(gvariant.parse('v', [ 0x2a, 0x0, 0x0, 0x0, 0x0, 0x69 ]), 42);
+    it('should map variants to an object with the variant\'s type and value', function () {
+        assert.deepStrictEqual(gvariant.parse('v', [ 0x2a, 0x0, 0x0, 0x0, 0x0, 0x69 ]), { type: 'i', value: 42 });
+        assert.deepStrictEqual(gvariant.parse('v', [ 0x2a, 0x0, 0x61, 0x79 ]), { type: 'ay', value: [ 42 ] });
     });
 
     it('should map maybes to null or their contents', function () {
@@ -84,7 +85,8 @@ describe('gvariant.parse()', function () {
                                                          0x64, 0x65, 0x66, 0x0,
                                                          0x0, 0x0, 0x0, 0x0,
                                                          0x2b, 0x0, 0x0, 0x0,
-                                                         0x0, 0x69, 0x4, 0xf, 0x1f ]), { abc: 42, def: 43 });
+                                                         0x0, 0x69, 0x4, 0xf, 0x1f ]),
+                               { abc: { type: 'i', value: 42 }, def: { type: 'i', value: 43 } });
     });
 
     describe('should handle non-normal serialized data:', function () {

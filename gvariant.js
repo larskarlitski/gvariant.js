@@ -164,7 +164,7 @@ function nextType(signature, index) {
             return {
                 id: 'v',
                 alignment: 8,
-                defaultValue: [],
+                defaultValue: { type: '()', value: [] },
 
                 read: function (buf, start, end) {
                     var sep = end - 1;
@@ -175,7 +175,13 @@ function nextType(signature, index) {
                         sep -= 1;
                     }
 
-                    return parse(buf.toString('ascii', sep + 1, end), buf.slice(start, sep));
+                    var type = buf.toString('ascii', sep + 1, end);
+                    var data = buf.slice(start, sep);
+
+                    return {
+                        type: type,
+                        value: parse(type, data)
+                    };
                 }
             };
 
