@@ -20,7 +20,7 @@ function nextType(signature, index) {
         case 'y':
             return {
                 id: 'y',
-                size: 1,
+                fixedSize: 1,
                 alignment: 1,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -33,7 +33,7 @@ function nextType(signature, index) {
         case 'n':
             return {
                 id: 'n',
-                size: 2,
+                fixedSize: 2,
                 alignment: 2,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -46,7 +46,7 @@ function nextType(signature, index) {
         case 'q':
             return {
                 id: 'q',
-                size: 2,
+                fixedSize: 2,
                 alignment: 2,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -59,7 +59,7 @@ function nextType(signature, index) {
         case 'i':
             return {
                 id: 'i',
-                size: 4,
+                fixedSize: 4,
                 alignment: 4,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -72,7 +72,7 @@ function nextType(signature, index) {
         case 'u':
             return {
                 id: 'u',
-                size: 4,
+                fixedSize: 4,
                 alignment: 4,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -85,7 +85,7 @@ function nextType(signature, index) {
         case 'x':
             return {
                 id: 'x',
-                size: 8,
+                fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -102,7 +102,7 @@ function nextType(signature, index) {
         case 't':
             return {
                 id: 't',
-                size: 8,
+                fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0,
                 read: function (buf, start, end) {
@@ -117,7 +117,7 @@ function nextType(signature, index) {
         case 'd':
             return {
                 id: 'd',
-                size: 8,
+                fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0.0,
                 read: function (buf, start, end) {
@@ -130,7 +130,7 @@ function nextType(signature, index) {
         case 'b':
             return {
                 id: 'b',
-                size: 1,
+                fixedSize: 1,
                 alignment: 1,
                 defaultValue: false,
                 read: function (buf, start, end) {
@@ -195,8 +195,8 @@ function nextType(signature, index) {
                         return null;
 
                     // Just
-                    if (this.element.size) {
-                        if (end - start !== this.element.size)
+                    if (this.element.fixedSize) {
+                        if (end - start !== this.element.fixedSize)
                             return null;
 
                         return this.element.read(buf, start, end);
@@ -215,7 +215,7 @@ function nextType(signature, index) {
             while (signature[end] !== ')') {
                 var el = nextType(signature, end);
                 elements.push(el);
-                size = align(size, el.alignment) + el.size;
+                size = align(size, el.alignment) + el.fixedSize;
                 alignment = Math.max(alignment, el.alignment);
                 end += el.id.length;
             }
@@ -224,12 +224,12 @@ function nextType(signature, index) {
             return {
                 id: signature.slice(index, end + 1),
                 elements: elements,
-                size: size,
+                fixedSize: size,
                 alignment: alignment,
                 defaultValue: elements.map(function (el) { return el.defaultValue; }),
 
                 read: function (buf, start, end) {
-                    if (this.size && end - start !== this.size)
+                    if (this.fixedSize && end - start !== this.fixedSize)
                         return this.defaultValue;
 
                     var offsets = offsetInfo(buf, start, end);
@@ -240,8 +240,8 @@ function nextType(signature, index) {
                         var el = this.elements[i];
                         cur = align(cur, el.alignment);
                         var next;
-                        if (el.size)
-                            next = cur + el.size;
+                        if (el.fixedSize)
+                            next = cur + el.fixedSize;
                         else if (i < this.elements.length - 1)
                             next = offsets.read(--curOffset);
                         else
@@ -261,19 +261,19 @@ function nextType(signature, index) {
                 id: signature.substr(index, key.id.length + value.id.length + 2),
                 key: key,
                 value: value,
-                size: align(key.size, value.alignment) + value.size,
+                fixedSize: align(key.fixedSize, value.alignment) + value.fixedSize,
                 alignment: Math.max(key.alignment, value.alignment),
                 defaultValue: [ key.defaultValue, value.defaultValue ],
 
                 read: function (buf, start, end) {
-                    if (this.size && end - start !== this.size)
+                    if (this.fixedSize && end - start !== this.fixedSize)
                         return this.defaultValue;
 
                     var offsets = offsetInfo(buf, start, end);
                     var keyEnd, valueEnd;
 
-                    if (this.key.size) {
-                        keyEnd = start + this.key.size;
+                    if (this.key.fixedSize) {
+                        keyEnd = start + this.key.fixedSize;
                         valueEnd = end;
                     }
                     else {
@@ -304,15 +304,15 @@ function nextType(signature, index) {
                     var size = end - start;
                     var i, n, cur, offsets;
 
-                    if (this.element.size) {
-                        if (size % this.element.size !== 0)
+                    if (this.element.fixedSize) {
+                        if (size % this.element.fixedSize !== 0)
                             return [];
 
-                        n = size / this.element.size;
+                        n = size / this.element.fixedSize;
                         cur = start;
                         for (i = 0; i < n; i++) {
-                            values.push(this.element.read(buf, cur, cur + this.element.size));
-                            cur += this.element.size;
+                            values.push(this.element.read(buf, cur, cur + this.element.fixedSize));
+                            cur += this.element.fixedSize;
                         }
                     }
                     else {
