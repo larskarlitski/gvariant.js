@@ -19,21 +19,19 @@ describe('gvariant.parse()', function () {
     it('should map gvariant integer types to javascript numbers', function () {
         assert.strictEqual(gvariant.parse('y', [ 0x2a ]), 42);
 
-        assert.strictEqual(gvariant.parse('n', [ 0xffffffd6, 0xffffffff ]), -42);
+        assert.strictEqual(gvariant.parse('n', [ 0xd6, 0xff ]), -42);
         assert.strictEqual(gvariant.parse('q', [ 0x2a, 0x0 ]), 42);
 
-        assert.strictEqual(gvariant.parse('i', [ 0xffffffd6, 0xffffffff, 0xffffffff, 0xffffffff ]), -42);
+        assert.strictEqual(gvariant.parse('i', [ 0xd6, 0xff, 0xff, 0xff ]), -42);
         assert.strictEqual(gvariant.parse('u', [ 0x2a, 0x0, 0x0, 0x0 ]), 42);
 
-        assert.strictEqual(gvariant.parse('x', [ 0xffffffd6, 0xffffffff, 0xffffffff, 0xffffffff,
-                                                 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff ]), -42);
+        assert.strictEqual(gvariant.parse('x', [ 0xd6, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff ]), -42);
         assert.strictEqual(gvariant.parse('t', [ 0x2a, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0 ]), 42);
     });
 
     it('should be able to read integers larger than 32 bits', function () {
-        assert.strictEqual(gvariant.parse('x', [ 0x0, 0xe, 0xfffffffa, 0xffffffd5,
-                                                 0xfffffffe, 0xffffffff, 0xffffffff, 0xffffffff ]), -5000000000);
-        assert.strictEqual(gvariant.parse('x', [ 0x0, 0xfffffff2, 0x5, 0x2a, 0x1, 0x0, 0x0, 0x0 ]), 5000000000);
+        assert.strictEqual(gvariant.parse('x', [ 0x0, 0xe, 0xfa, 0xd5, 0xfe, 0xff, 0xff, 0xff ]), -5000000000);
+        assert.strictEqual(gvariant.parse('x', [ 0x0, 0xf2, 0x5, 0x2a, 0x1, 0x0, 0x0, 0x0 ]), 5000000000);
     });
 
     it('should map gvariant doubles to javascript numbers', function () {
