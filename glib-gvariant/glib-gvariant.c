@@ -32,10 +32,10 @@ int main (int argc, char **argv)
 
   if (size > 0)
     {
-      g_print ("[ 0x%x", data[0]);
+      g_print ("[ 0x%x", data[0] & 0xff);
 
       for (gsize i = 1; i < size; i++)
-        g_print (", 0x%x", data[i]);
+        g_print (", 0x%x", data[i] & 0xff);
 
       g_print (" ]\n");
     }
