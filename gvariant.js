@@ -342,9 +342,6 @@ function nextType(signature, index) {
 }
 
 function parse(typestr, data) {
-    if (Array.isArray(data))
-        data = new Buffer(data);
-
     var type = nextType(typestr, 0);
     if (!type || type.id.length !== typestr.length)
         throw new TypeError('invalid type string: ' + typestr);
