@@ -2,8 +2,7 @@
 var Long = require('long');
 
 function align(n, size) {
-    var r = n % size;
-    return r === 0 ? n : n + size - r;
+    return n + (size - n % size) % size;
 }
 
 function offsetInfo(buf, start, end) {
