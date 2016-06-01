@@ -9,7 +9,8 @@
     "main": "gvariant.js",
     "files": [
         "gvariant.js",
-        "test.js"
+        "dynamic-buffer.js",
+        "test"
     ],
     "engines": {
         "node": ">=5.x"

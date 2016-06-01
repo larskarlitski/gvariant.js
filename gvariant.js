@@ -1,5 +1,6 @@
 
 var Long = require('long');
+var DynamicBuffer = require('./dynamic-buffer');
 
 function align(n, size) {
     return n + (size - n % size) % size;
@@ -16,6 +17,17 @@ function offsetInfo(buf, start, end) {
         throw RangeError();
 }
 
+function writeOffsets(buf, offsets, start, end) {
+    if (end - start <= 0xff)
+        offsets.forEach(function (o) { buf.appendUInt8(o); });
+    else if (end - start <= 0xffff)
+        offsets.forEach(function (o) { buf.appendUInt16(o); });
+    else if (end - start <= 0xffffffff)
+        offsets.forEach(function (o) { buf.appendUInt32(o); });
+    else
+        throw RangeError();
+}
+
 function nextType(signature, index) {
     switch (signature[index]) {
         case 'y':
@@ -24,10 +36,15 @@ function nextType(signature, index) {
                 fixedSize: 1,
                 alignment: 1,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 1)
                         return this.defaultValue;
                     return buf.readUInt8(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendUInt8(value);
                 }
             };
 
@@ -37,10 +54,15 @@ function nextType(signature, index) {
                 fixedSize: 2,
                 alignment: 2,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 2)
                         return this.defaultValue;
                     return buf.readInt16LE(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendInt16(value);
                 }
             };
 
@@ -50,10 +72,15 @@ function nextType(signature, index) {
                 fixedSize: 2,
                 alignment: 2,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 2)
                         return this.defaultValue;
                     return buf.readUInt16LE(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendUInt16(value);
                 }
             };
 
@@ -63,10 +90,15 @@ function nextType(signature, index) {
                 fixedSize: 4,
                 alignment: 4,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 4)
                         return this.defaultValue;
                     return buf.readInt32LE(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendInt32(value);
                 }
             };
 
@@ -76,10 +108,15 @@ function nextType(signature, index) {
                 fixedSize: 4,
                 alignment: 4,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 4)
                         return this.defaultValue;
                     return buf.readUInt32LE(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendUInt32(value);
                 }
             };
 
@@ -89,12 +126,19 @@ function nextType(signature, index) {
                 fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 8)
                         return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
                     return Long.fromBits(lo, hi).toNumber();
+                },
+
+                write: function (value, buf) {
+                    var l = Long.fromNumber(value);
+                    buf.appendUInt32(l.getLowBitsUnsigned());
+                    buf.appendUInt32(l.getHighBitsUnsigned());
                 }
             };
 
@@ -104,12 +148,19 @@ function nextType(signature, index) {
                 fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 8)
                         return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
                     return Long.fromBits(lo, hi, true).toNumber();
+                },
+
+                write: function (value, buf) {
+                    var l = Long.fromNumber(value);
+                    buf.appendUInt32(l.getLowBitsUnsigned());
+                    buf.appendUInt32(l.getHighBitsUnsigned());
                 }
             };
 
@@ -119,10 +170,15 @@ function nextType(signature, index) {
                 fixedSize: 8,
                 alignment: 8,
                 defaultValue: 0.0,
+
                 read: function (buf, start, end) {
                     if (end - start !== 8)
                         return this.defaultValue;
                     return buf.readDoubleLE(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendDouble(value);
                 }
             };
 
@@ -132,10 +188,15 @@ function nextType(signature, index) {
                 fixedSize: 1,
                 alignment: 1,
                 defaultValue: false,
+
                 read: function (buf, start, end) {
                     if (end - start !== 1)
                         return this.defaultValue;
                     return !!buf.readUInt8(start);
+                },
+
+                write: function (value, buf) {
+                    buf.appendUInt8(!!value);
                 }
             };
 
@@ -156,6 +217,11 @@ function nextType(signature, index) {
                     if (nul >= 0)
                         return str.substring(0, nul);
                     return str;
+                },
+
+                write: function (value, buf) {
+                    buf.append(value);
+                    buf.appendUInt8(0);
                 }
             };
 
@@ -181,6 +247,13 @@ function nextType(signature, index) {
                         type: type,
                         value: parse(type, data)
                     };
+                },
+
+                write: function (value, buf) {
+                    var type = parseType(value.type);
+                    type.write(value.value, buf);
+                    buf.appendUInt8(0);
+                    buf.append(value.type);
                 }
             };
 
@@ -208,6 +281,15 @@ function nextType(signature, index) {
                     }
                     else {
                         return this.element.read(buf, start, end - 1);
+                    }
+                },
+
+                write: function (value, buf) {
+                    buf.align(this.alignment);
+                    if (value !== null) {
+                        this.element.write(value, buf);
+                        if (!this.element.fixedSize)
+                            buf.appendUInt8(0);
                     }
                 }
             };
@@ -255,6 +337,21 @@ function nextType(signature, index) {
                         cur = next;
                     }
                     return values;
+                },
+
+                write: function (value, buf) {
+                    var offsets = [];
+                    var start = buf.length;
+                    for (var i = 0; i < this.elements.length; i++) {
+                        var el = this.elements[i];
+
+                        buf.align(el.alignment);
+                        el.write(value[i], buf);
+
+                        if (!el.fixedSize && i < this.elements.length - 1)
+                            offsets.push(buf.length - start);
+                    }
+                    writeOffsets(buf, offsets.reverse(), start, buf.length);
                 }
             };
 
@@ -289,6 +386,19 @@ function nextType(signature, index) {
                         this.key.read(buf, start, keyEnd),
                         this.value.read(buf, align(keyEnd, this.value.alignment), valueEnd)
                     ];
+                },
+
+                write: function (value, buf) {
+                    var start = buf.length;
+
+                    this.key.write(value[0], buf);
+                    var keyEnd = buf.length - start;
+
+                    buf.align(this.value.alignment);
+                    this.value.write(value[1], buf);
+
+                    if (!this.key.fixedSize)
+                        writeOffsets(buf, [ keyEnd ], start, buf.length);
                 }
             };
 
@@ -335,17 +445,59 @@ function nextType(signature, index) {
                         values = values.reduce(function (o, v) { o[v[0]] = v[1]; return o; }, {});
 
                     return values;
+                },
+
+                write: function (value, buf) {
+                    var i, start, offsets;
+
+                    if (!Array.isArray(value)) {
+                        var array = [];
+                        for (i in value)
+                            array.push([ i, value[i] ]);
+                        value = array;
+                    }
+
+                    if (this.element.fixedSize) {
+                        for (i = 0; i < value.length; i++) {
+                            buf.align(this.element.alignment);
+                            this.element.write(value[i], buf);
+                        }
+                    }
+                    else {
+                        start = buf.length;
+                        offsets = [];
+                        for (i = 0; i < value.length; i++) {
+                            buf.align(this.element.alignment);
+                            this.element.write(value[i], buf);
+                            offsets.push(buf.length - start);
+                        }
+                        writeOffsets(buf, offsets, start, buf.length);
+                    }
                 }
             };
     }
 }
 
-function parse(typestr, data) {
-    var type = nextType(typestr, 0);
-    if (!type || type.id.length !== typestr.length)
-        throw new TypeError('invalid type string: ' + typestr);
+function parseType(str) {
+    var type = nextType(str, 0);
+    if (!type || type.id.length !== str.length)
+        throw new TypeError('invalid type string: ' + str);
+    return type;
+}
 
+function parse(typestr, data) {
+    var type = parseType(typestr);
     return type.read(data, 0, data.length);
 }
 
-exports.parse = parse;
+function serialize(typestr, value) {
+    var type = parseType(typestr);
+    var buf = new DynamicBuffer();
+    type.write(value, buf);
+    return buf.toBuffer();
+}
+
+module.exports = {
+    parse: parse,
+    serialize: serialize
+};

@@ -2,14 +2,17 @@
 var gvariant = require('../gvariant');
 var assert = require('assert');
 
-function test(type, data, value) {
-    var buf = new Buffer(data);
+describe('gvariant', function () {
 
-    var parsed = gvariant.parse(type, buf);
-    assert.deepStrictEqual(parsed, value);
-}
+    function test(type, data, value) {
+        var buf = new Buffer(data);
 
-describe('gvariant.parse()', function () {
+        var parsed = gvariant.parse(type, buf);
+        assert.deepStrictEqual(parsed, value);
+
+        var serialized = gvariant.serialize(type, value);
+        assert.deepStrictEqual(serialized, buf);
+    }
 
     it('should throw an error when passed invalid type strings', function () {
         assert.throws(function () { gvariant.parse('bb'); }, TypeError);
@@ -104,6 +107,10 @@ describe('gvariant.parse()', function () {
     });
 
     describe('should handle non-normal serialized data:', function () {
+        function test(type, data, value) {
+            var parsed = gvariant.parse(type, new Buffer(data));
+            assert.deepStrictEqual(parsed, value);
+        }
 
         it('wrong size for fixed size value', function () {
             test('b', [ 0x1, 0x1, 0x1 ], false);

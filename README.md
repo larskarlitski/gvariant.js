@@ -5,9 +5,6 @@ GVariant.js
 A JavaScript implementation of the GVariant serialization specification. It
 maps serialized GVariants to native JavaScript values.
 
-Only a reader is implemented at the moment. It can only handle little-endian
-data in normal form.
-
 ```javascript
 var gvariant = require('gvariant');
 
