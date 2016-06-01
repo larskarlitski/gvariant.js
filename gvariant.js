@@ -1,4 +1,6 @@
 
+var Long = require('long');
+
 function align(n, size) {
     var r = n % size;
     return r === 0 ? n : n + size - r;
@@ -93,9 +95,7 @@ function nextType(signature, index) {
                         return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
-                    if (hi > 0x7fffffff)
-                        return - ((~hi * 0x100000000) + ~lo + 1);
-                    return (hi * 0x100000000) + lo;
+                    return Long.fromBits(lo, hi).toNumber();
                 }
             };
 
@@ -110,7 +110,7 @@ function nextType(signature, index) {
                         return this.defaultValue;
                     var lo = buf.readUInt32LE(start);
                     var hi = buf.readUInt32LE(start + 4);
-                    return (hi * 0x100000000) + lo;
+                    return Long.fromBits(lo, hi, true).toNumber();
                 }
             };
 
